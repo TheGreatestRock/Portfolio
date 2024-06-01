@@ -1,0 +1,55 @@
+<!-- portfolio/project_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} - Portfolio{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="my-4">{{ project.title }}</h1>
+            <img src="{{ project.image.url }}" class="img-fluid mb-4" alt="{{ project.title }}">
+            <div class="mb-4">
+                <h3>Description</h3>
+                <p>{{ project.description }}</p>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Basic Information</h5>
+                    <p><strong>Languages:</strong>
+                    {% for language in project.languages.all %}
+                        {{ language.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    </p>
+                    <p><strong>Frameworks:</strong>
+                    {% for framework in project.frameworks.all %}
+                        {{ framework.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    </p>
+                    {% if project.github_link %}
+                        <p><strong>GitHub:</strong> <a href="{{ project.github_link }}" target="_blank">{{ project.github_link }}</a></p>
+                    {% endif %}
+                    {% if project.link %}
+                        <p><strong>Project Link:</strong> <a href="{{ project.link }}" target="_blank">{{ project.link }}</a></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Additional Pages (Full width) -->
+        {% for additional_page in project.additional_pages.all %}
+        <div class="col-lg-12 mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ additional_page.title }}</h5>
+                    <p>{{ additional_page.content }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

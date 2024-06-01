@@ -1,17 +1,22 @@
 {% extends 'base.html' %}
 
+{% block title %}Home - Portfolio{% endblock %}
+
 {% block content %}
-<h1>My Portfolio</h1>
-<div>
-    {% for project in projects %}
-        <div>
-            <h2>{{ project.title }}</h2>
-            <img src="{{ project.image.url }}" alt="{{ project.title }}">
-            <p>{{ project.description }}</p>
-            {% if project.link %}
-                <a href="{{ project.link }}">View Project</a>
-            {% endif %}
-        </div>
-    {% endfor %}
+<div class="container">
+    <h1 class="my-4">My Portfolio</h1>
+    <div class="row">
+        {% for project in projects %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <a href="{% url 'project_detail' project.pk %}"><img class="card-img-top" src="{{ project.image.url }}" alt="{{ project.title }}"></a>
+                    <div class="card-body">
+                        <h4 class="card-title"><a href="{% url 'project_detail' project.pk %}">{{ project.title }}</a></h4>
+                        <p class="card-text">{{ project.description }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

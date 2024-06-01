@@ -1,0 +1,10 @@
+<!-- portfolio/page_detail.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ page_info.title }}</h1>
+<p>{{ page_info.description }}</p>
+{% for additional_page in additional_pages %}
+<h2>{{ additional_page.title }}</h2>
+<p>{{ additional_page.content }}</p>
+{% endfor %}
+{% endblock %}
