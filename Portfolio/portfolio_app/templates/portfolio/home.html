@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>My Portfolio</h1>
+<div>
+    {% for project in projects %}
+        <div>
+            <h2>{{ project.title }}</h2>
+            <img src="{{ project.image.url }}" alt="{{ project.title }}">
+            <p>{{ project.description }}</p>
+            {% if project.link %}
+                <a href="{{ project.link }}">View Project</a>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
