@@ -8,7 +8,11 @@
     <div class="row">
         <div class="col-lg-8">
             <h1 class="my-4">{{ project.title }}</h1>
-            <img src="{{ project.image.url }}" class="img-fluid mb-4" alt="{{ project.title }}">
+            {% if project.image.url %}
+                <img src="{{ project.image.url }}" class="img-fluid mb-4" alt="{{ project.title }}">
+            {% else %}
+                <p>No image available for this project</p>
+            {% endif %}
             <div class="mb-4">
                 <h3>Description</h3>
                 <p>{{ project.description }}</p>
@@ -21,11 +25,15 @@
                     <p><strong>Languages:</strong>
                     {% for language in project.languages.all %}
                         {{ language.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        None
                     {% endfor %}
                     </p>
                     <p><strong>Frameworks:</strong>
                     {% for framework in project.frameworks.all %}
                         {{ framework.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        None
                     {% endfor %}
                     </p>
                     {% if project.github_link %}
@@ -37,19 +45,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <!-- Additional Pages (Full width) -->
-        {% for additional_page in project.additional_pages.all %}
-        <div class="col-lg-12 mt-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ additional_page.title }}</h5>
-                    <p>{{ additional_page.content }}</p>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock %}

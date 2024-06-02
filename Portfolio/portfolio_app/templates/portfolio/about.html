@@ -1,10 +1,52 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}About Me - Portfolio{% endblock %}
+{% block title %}About Me{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1 class="my-4">About Me</h1>
-        <p>Your bio and information go here.</p>
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header text-center bg-primary text-white">
+                <h1>About Me</h1>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ profile_picture_url }}" alt="{{ name }}'s Profile Picture" class="rounded-circle mb-3" width="150" height="150">
+                <h2 class="card-title">{{ name }}</h2>
+                <p class="lead">{{ bio }}</p>
+                <p>Email: <a href="mailto:{{ email }}" class="text-primary">{{ email }}</a></p>
+            </div>
+        </div>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h3>Skills</h3>
+            </div>
+            <div class="card-body">
+                {% for category, skills in skills.items %}
+                    <h4>{{ category }}</h4>
+                    <p>
+                        {% for skill in skills %}
+                            <span class="badge badge-info">{{ skill }}</span>
+                        {% endfor %}
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h3>Find me on</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for platform, url in social_links.items %}
+                        <li class="list-group-item">
+                            <a href="{{ url }}" target="_blank">
+                                <i class="fab fa-{{ platform|lower }} mr-2"></i>{{ platform|title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}

@@ -1,11 +1,28 @@
 from django.contrib import admin
 
 # Register your models here.
-from django.contrib import admin
-from .models import AdditionalPage, Framework, Language, PageInfo, Project
+from .models import Bio, Entreprise, Framework, Language, Project
+from django.db.models import JSONField
+from django_json_widget.widgets import JSONEditorWidget
 
-admin.site.register(Project)
+
+
+class ProjectAdmin(admin.ModelAdmin):
+    filter_horizontal = ('languages', 'frameworks')
+
+class BioAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        JSONField: {'widget': JSONEditorWidget},
+    }
+
+admin.site.register(Project, ProjectAdmin)
 admin.site.register(Language)
 admin.site.register(Framework)
-admin.site.register(PageInfo)
-admin.site.register(AdditionalPage)
+admin.site.register(Entreprise)
+admin.site.register(Bio, BioAdmin)
+
+
+
+
+
+
