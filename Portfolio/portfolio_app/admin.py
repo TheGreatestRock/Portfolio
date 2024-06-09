@@ -37,7 +37,6 @@ class TextFieldAdmin(admin.ModelAdmin):
     search_fields = ('content',)
     filter_horizontal = ('competences', 'apprentissages_critiques', 'glossary_terms', 'images')
 
-
 @admin.register(Entreprise)
 class EntrepriseAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -55,3 +54,8 @@ class BioAdmin(admin.ModelAdmin):
 class GlossaryTermAdmin(admin.ModelAdmin):
     list_display = ('term', 'description')
     search_fields = ('term', 'description')
+
+@admin.register(Image)
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ('image',)
+    search_fields = ('image',)

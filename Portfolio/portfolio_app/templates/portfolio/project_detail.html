@@ -3,15 +3,34 @@
 {% block title %}{{ project.title }} - Portfolio{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid mt-5">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-md-2 mb-4">
+            <!-- Compétences et Apprentissages Critiques -->
+            <div class="card shadow-sm sticky-top">
+                <div class="card-body">
+                    <h5 class="card-title">Compétences</h5>
+                    <div class="list-group">
+                        {% for competence in all_competences %}
+                            <button class="list-group-item list-group-item-action" onclick="filterTextFieldsByCompetence('{{ competence.name }}')">
+                                {{ competence.name }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary mt-3" onclick="resetFilter()">Réinitialiser</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Contenu principal -->
             <h1 class="my-4">{{ project.title }}</h1>
             {% if project.image %}
-                <img src="{{ project.image.url }}" class="img-fluid mb-4" alt="{{ project.title }}">
+                <img src="{{ project.image.url }}" class="img-fluid rounded shadow mb-4" alt="{{ project.title }}">
             {% else %}
-                <p>No image available for this project</p>
+                <p>Pas d'image disponible pour ce projet</p>
             {% endif %}
+
             <div class="mb-4">
                 <h3>Description</h3>
                 <p>{{ project.description }}</p>
@@ -21,67 +40,75 @@
             <div class="mb-4">
                 <h3>Champs de Texte</h3>
                 {% for text_field in text_fields %}
-                    <div class="mb-4">
+                    <div class="mb-4 text-field-item" data-competences="{{ text_field.competences.all|join:',' }}" data-apprentissages="{{ text_field.apprentissages_critiques.all|join:',' }}">
                         <p>
                             {% for word in text_field.content.split %}
-                                {% if word in glossary_terms_dict %}
-                                <span class="hover-word" onmouseover="showPopup(this, `{{ word }}`, `{{ glossary_terms_dict|escapejs }}`)">
-                                    {{ word }}
-                                </span>                                
+                                {% if word in all_glossary_terms %}
+                                    <span class="hover-word" onmouseover="showPopup(this, '{{ word }}', '{{ glossary_terms }}')" onmouseout="hidePopup()">
+                                        {{ word }}
+                                    </span>
+                                {% elif word == '\n' %}
+                                    <br>
                                 {% else %}
                                     <span>{{ word }}</span>
                                 {% endif %}
                             {% endfor %}
                         </p>
-                        {% for image in text_field.images.all %}
-                            <img src="{{ image.image.url }}" class="img-fluid mb-4" alt="Image">
-                        {% endfor %}
-                        <h5>Compétences Associées</h5>
-                        <ul>
-                            {% for competence in text_field.competences.all %}
-                                <li>{{ competence.name }}</li>
-                            {% endfor %}
-                        </ul>
-                        <h5>Apprentissages Critiques Associés</h5>
-                        <ul>
-                            {% for apprentissage in text_field.apprentissages_critiques.all %}
-                                <li>{{ apprentissage.title }}</li>
-                            {% endfor %}
-                        </ul>
+                        
+                        {% if text_field.images.all %}
+                            <div id="carousel-{{ text_field.id }}" class="carousel slide" data-ride="carousel">
+                                <div class="carousel-inner">
+                                    {% for image in text_field.images.all %}
+                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                            <img src="{{ image.image.url }}" class="d-block w-100 img-fluid rounded carousel-img" alt="Image">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <a class="carousel-control-prev" href="#carousel-{{ text_field.id }}" role="button" data-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Précédent</span>
+                                </a>
+                                <a class="carousel-control-next" href="#carousel-{{ text_field.id }}" role="button" data-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Suivant</span>
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card">
+        <div class="col-md-2">
+            <!-- Informations de base -->
+            <div class="card shadow-sm sticky-top">
                 <div class="card-body">
-                    <h5 class="card-title">Basic Information</h5>
-                    <p><strong>Languages:</strong>
+                    <h5 class="card-title">Informations de Base</h5>
+                    <p><strong>Langages :</strong>
                     {% for language in project.languages.all %}
                         {{ language.name }}{% if not forloop.last %}, {% endif %}
                     {% empty %}
-                        None
+                        Aucun
                     {% endfor %}
                     </p>
-                    <p><strong>Frameworks:</strong>
+                    <p><strong>Frameworks :</strong>
                     {% for framework in project.frameworks.all %}
                         {{ framework.name }}{% if not forloop.last %}, {% endif %}
                     {% empty %}
-                        None
+                        Aucun
                     {% endfor %}
                     </p>
                     {% if project.github_link %}
-                        <p><strong>GitHub:</strong> <a href="{{ project.github_link }}" target="_blank">{{ project.github_link }}</a></p>
+                        <p><strong>GitHub :</strong> <a href="{{ project.github_link }}" target="_blank">{{ project.github_link }}</a></p>
                     {% endif %}
                     {% if project.link %}
-                        <p><strong>Project Link:</strong> <a href="{{ project.link }}" target="_blank">{{ project.link }}</a></p>
+                        <p><strong>Lien du Projet :</strong> <a href="{{ project.link }}" target="_blank">{{ project.link }}</a></p>
                     {% endif %}
                     {% if project.referent_teacher %}
-                        <p><strong>Referent Teacher:</strong> {{ project.referent_teacher }}</p>
+                        <p><strong>Enseignant Référent :</strong> {{ project.referent_teacher }}</p>
                     {% endif %}
                     {% if project.supervisor %}
-                        <p><strong>Internship Supervisor:</strong> {{ project.supervisor }}</p>
+                        <p><strong>Superviseur de Stage :</strong> {{ project.supervisor }}</p>
                     {% endif %}
                 </div>
             </div>
@@ -89,51 +116,120 @@
     </div>
 </div>
 
-<!-- Styles for Popup -->
-<style>
-    .popup {
-        display: none;
-        position: absolute;
-        background-color: #f9f9f9;
-        border: 1px solid #ccc;
-        padding: 10px;
-        z-index: 1;
-    }
+<!-- Styles for Popup and Cards -->
+{% block styles %}
+    <style>
+        .container-fluid {
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
 
-    .hover-word {
-        font-weight: bold;
-    }
-</style>
+        .popup {
+            display: none;
+            position: absolute;
+            border: 1px solid #ccc;
+            padding: 10px;
+            z-index: 1000; /* Adjust z-index to ensure it appears above other elements */
+            background-color: #fff; /* Add a background color for better visibility */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-<!-- Popup Element -->
-<div id="popup" class="popup"></div>
+        .hover-word {
+            font-weight: bold;
+            color: #ffc107; /* Match the accent color of the base layout */
+        }
 
-<!-- JavaScript for Popup -->
+        .hidden {
+            opacity: 0.5; /* Opacité réduite pour les éléments masqués */
+        }
+
+        .carousel-img {
+            max-height: 300px; /* Set a maximum height */
+            object-fit: cover; /* Ensure the image covers the whole container */
+        }
+    </style>
+{% endblock %}
+    
+<!-- Scripts for Popup and Cards -->
+{% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var hoverWords = document.querySelectorAll('.hover-word');
+    let currentPopup = null;
 
-        hoverWords.forEach(function (element) {
-            element.addEventListener('mouseout', function () {
-                hidePopup();
-            });
-        });
-    });
+    function showPopup(element, word, glossary_terms) {
+        // Remove previous popup
+        hidePopup();
 
-    function showPopup(element, word, glossaryTerms) {
-        var popup = document.getElementById("popup");
-        var glossaryTermsObj = JSON.parse(glossaryTerms);
-        popup.innerHTML = glossaryTermsObj[word];
-        popup.style.display = "block";
-        popup.style.top = (element.offsetTop + element.offsetHeight) + "px";
-        popup.style.left = element.offsetLeft + "px";
+        // Récupérer les informations du mot dans le model GlossaryTerm
+        let terms = JSON.parse(glossary_terms);
+        let term = terms[word];
+        let description = term.description;
+        
+
+        // Créer le contenu du popup
+        let popup = document.createElement('div');
+        popup.className = 'popup';
+        popup.innerHTML = `
+            <h5>${term.term}</h5>
+            <p>${term.description}</p>
+            <p class="text-muted">${term.source}</p>
+        `;
+
+        // Positionner le popup
+        let rect = element.getBoundingClientRect();
+        popup.style.top = `${rect.top + window.scrollY + rect.height}px`;
+        popup.style.left = `${rect.left + window.scrollX}px`;
+
+        // Afficher le popup
+        document.body.appendChild(popup);
+        popup.style.display = 'block';
+        currentPopup = popup;
     }
 
     function hidePopup() {
-        var popup = document.getElementById("popup");
-        popup.style.display = "none";
+        if (currentPopup !== null) {
+            currentPopup.remove();
+            currentPopup = null;
+        }
     }
-    </script>
-    
+
+    function filterTextFieldsByCompetence(competence) {
+        let textFields = document.querySelectorAll('.text-field-item');
+        textFields.forEach(textField => {
+            let competences = textField.getAttribute('data-competences').split(',');
+            if (competences.includes(competence)) {
+                textField.classList.remove('hidden');
+            } else {
+                textField.classList.add('hidden');
+            }
+        });
+    }
+
+    function resetFilter() {
+        let textFields = document.querySelectorAll('.text-field-item');
+        textFields.forEach(textField => {
+            textField.classList.remove('hidden');
+        });
+    }
+
+    document.addEventListener('click', function(event) {
+        if (currentPopup !== null && !event.target.classList.contains('hover-word')) {
+            hidePopup();
+        }
+    });
+
+    document.addEventListener('scroll', function() {
+        if (currentPopup !== null) {
+            hidePopup();
+        }
+    });
+
+    // Ensure carousels are initialized correctly
+    document.addEventListener('DOMContentLoaded', function () {
+        $('.carousel').each(function() {
+            $(this).carousel();
+        });
+    });
 </script>
+{% endblock %}
 {% endblock %}

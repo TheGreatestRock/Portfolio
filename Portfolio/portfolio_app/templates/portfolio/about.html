@@ -10,7 +10,11 @@
                 <h1>About Me</h1>
             </div>
             <div class="card-body text-center">
+                {% if profile_picture_url %}
                 <img src="{{ profile_picture_url }}" alt="{{ name }}'s Profile Picture" class="rounded-circle mb-3" width="150" height="150">
+                {% else %}
+                <p>No profile picture available</p>
+                {% endif %}
                 <h2 class="card-title">{{ name }}</h2>
                 <p class="lead">{{ bio }}</p>
                 <p>Email: <a href="mailto:{{ email }}" class="text-primary">{{ email }}</a></p>
@@ -21,14 +25,18 @@
                 <h3>Skills</h3>
             </div>
             <div class="card-body">
-                {% for category, skills in skills.items %}
-                    <h4>{{ category }}</h4>
-                    <p>
-                        {% for skill in skills %}
-                            <span class="badge badge-info">{{ skill }}</span>
-                        {% endfor %}
-                    </p>
+                {% if skills %}
+                {% for category, skills_list in skills.items %}
+                <h4>{{ category }}</h4>
+                <p>
+                    {% for skill in skills_list %}
+                    <span class="badge badge-info">{{ skill }}</span>
+                    {% endfor %}
+                </p>
                 {% endfor %}
+                {% else %}
+                <p>No skills available</p>
+                {% endif %}
             </div>
         </div>
         <div class="card mb-4 shadow-sm">
@@ -36,15 +44,19 @@
                 <h3>Find me on</h3>
             </div>
             <div class="card-body">
+                {% if social_links %}
                 <ul class="list-group list-group-flush">
                     {% for platform, url in social_links.items %}
-                        <li class="list-group-item">
-                            <a href="{{ url }}" target="_blank">
-                                <i class="fab fa-{{ platform|lower }} mr-2"></i>{{ platform|title }}
-                            </a>
-                        </li>
+                    <li class="list-group-item">
+                        <a href="{{ url }}" target="_blank">
+                            <i class="fab fa-{{ platform|lower }} mr-2"></i>{{ platform|title }}
+                        </a>
+                    </li>
                     {% endfor %}
                 </ul>
+                {% else %}
+                <p>No social links available</p>
+                {% endif %}
             </div>
         </div>
     </div>
