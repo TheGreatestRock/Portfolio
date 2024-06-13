@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load glossary_tags %}
+
 
 {% block title %}About Me{% endblock %}
 
@@ -16,13 +18,13 @@
                 <p>No profile picture available</p>
                 {% endif %}
                 <h2 class="card-title">{{ name }}</h2>
-                <p class="lead">{{ bio }}</p>
+                <p class="lead">{{ bio|line_breaks }}</p>
                 <p>Email: <a href="mailto:{{ email }}" class="text-primary">{{ email }}</a></p>
             </div>
         </div>
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-secondary text-white">
-                <h3>Skills</h3>
+                <h3>Compétences</h3>
             </div>
             <div class="card-body">
                 {% if skills %}
@@ -41,7 +43,7 @@
         </div>
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-secondary text-white">
-                <h3>Find me on</h3>
+                <h3>Trouvez-moi sur</h3>
             </div>
             <div class="card-body">
                 {% if social_links %}

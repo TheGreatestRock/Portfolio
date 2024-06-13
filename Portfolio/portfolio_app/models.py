@@ -37,10 +37,12 @@ class ApprentissageCritique(models.Model):
         return self.title
 
 class Image(models.Model):
+    name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='text_field_images/')
+    description = models.TextField(blank=True)
 
     def __str__(self):
-        return f"Image {self.id}"
+        return f"{self.name}"
 
 class GlossaryTerm(models.Model):
     term = models.CharField(max_length=100)
@@ -60,6 +62,8 @@ class Project(models.Model):
     github_link = models.URLField(blank=True)
     supervisor = models.CharField(max_length=100, blank=True)
     referent_teacher = models.CharField(max_length=100, blank=True)
+    start = models.DateField()
+    end = models.DateField()
 
     def __str__(self):
         return self.title
@@ -67,7 +71,7 @@ class Project(models.Model):
 class TextField(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='text_fields')
     content = models.TextField()
-    images = models.ManyToManyField(Image, blank=True, related_name='associated_text_fields')
+    images = models.ManyToManyField(Image, blank=True)
     competences = models.ManyToManyField(Competence, blank=True)
     apprentissages_critiques = models.ManyToManyField(ApprentissageCritique, blank=True)
     glossary_terms = models.ManyToManyField(GlossaryTerm, blank=True)

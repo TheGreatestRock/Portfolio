@@ -57,5 +57,5 @@ class GlossaryTermAdmin(admin.ModelAdmin):
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('image',)
-    search_fields = ('image',)
+    list_display = ('id', 'name', 'image', 'description')
+    search_fields = ('id', 'name', 'image', 'description')

@@ -1,11 +1,15 @@
 {% extends 'base.html' %}
+{% load glossary_tags %}
 
 {% block title %}{{ project.title }} - Portfolio{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-5">
     <div class="row">
-        <div class="col-md-2 mb-4">
+        <!-- Arrow to show/hide the left sidebar -->
+        <div class="arrow-left" onclick="toggleLeftSidebar()"></div>
+
+        <div class="col-md-2 mb-4 sidebar-left">
             <!-- Compétences et Apprentissages Critiques -->
             <div class="card shadow-sm sticky-top">
                 <div class="card-body">
@@ -22,7 +26,7 @@
             </div>
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-8 main-content">
             <!-- Contenu principal -->
             <h1 class="my-4">{{ project.title }}</h1>
             {% if project.image %}
@@ -38,31 +42,28 @@
 
             <!-- Section Champs de Texte -->
             <div class="mb-4">
-                <h3>Champs de Texte</h3>
+                <h3>Présentation détaillée</h3>
                 {% for text_field in text_fields %}
                     <div class="mb-4 text-field-item" data-competences="{{ text_field.competences.all|join:',' }}" data-apprentissages="{{ text_field.apprentissages_critiques.all|join:',' }}">
                         <p>
-                            {% for word in text_field.content.split %}
-                                {% if word in all_glossary_terms %}
-                                    <span class="hover-word" onmouseover="showPopup(this, '{{ word }}', '{{ glossary_terms }}')" onmouseout="hidePopup()">
-                                        {{ word }}
-                                    </span>
-                                {% elif word == '\n' %}
-                                    <br>
-                                {% else %}
-                                    <span>{{ word }}</span>
-                                {% endif %}
-                            {% endfor %}
+                            {{ text_field.content|highlight_glossary_terms:all_glossary_terms|safe }}
                         </p>
-                        
+
                         {% if text_field.images.all %}
                             <div id="carousel-{{ text_field.id }}" class="carousel slide" data-ride="carousel">
                                 <div class="carousel-inner">
-                                    {% for image in text_field.images.all %}
-                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                {% for image in text_field.images.all %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <div class="carousel-image-container" data-toggle="modal" data-target="#imageModal" data-image="{{ image.image.url }}" data-description="{{ image.description|line_breaks }}">
                                             <img src="{{ image.image.url }}" class="d-block w-100 img-fluid rounded carousel-img" alt="Image">
+                                            <div class="zoom-icon">+</div>
                                         </div>
-                                    {% endfor %}
+                                        <!-- Hover description div -->
+                                        <div class="image-description bg-dark">
+                                            <p>{{ image.description|truncatechars:300 }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
                                 </div>
                                 <a class="carousel-control-prev" href="#carousel-{{ text_field.id }}" role="button" data-slide="prev">
                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -79,7 +80,10 @@
             </div>
         </div>
 
-        <div class="col-md-2">
+        <!-- Arrow to show/hide the right sidebar -->
+        <div class="arrow-right" onclick="toggleRightSidebar()"></div>
+
+        <div class="col-md-2 sidebar-right">
             <!-- Informations de base -->
             <div class="card shadow-sm sticky-top">
                 <div class="card-body">
@@ -108,9 +112,35 @@
                         <p><strong>Enseignant Référent :</strong> {{ project.referent_teacher }}</p>
                     {% endif %}
                     {% if project.supervisor %}
-                        <p><strong>Superviseur de Stage :</strong> {{ project.supervisor }}</p>
+                        <p><strong>Maitre de Stage :</strong> {{ project.supervisor }}</p>
+                    {% endif %}
+                    {% if project.start %}
+                        <p><strong>Début du projet :</strong><br> {{ project.start }}</p>
+                    {% endif %}
+                    {% if project.end %}
+                        <p><strong>Fin du projet :</strong><br> {{ project.end }}</p>
                     {% endif %}
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Zoom Image</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- The image will be inserted here -->
+                <img id="modalImage" src="" class="img-fluid" alt="Zoomed Image">
+            </div>
+            <div class="modal-footer modal-footer-start" id="modalDescription">
+                <!-- The image description will be inserted here -->
             </div>
         </div>
     </div>
@@ -118,61 +148,214 @@
 
 <!-- Styles for Popup and Cards -->
 {% block styles %}
-    <style>
-        .container-fluid {
-            border-radius: 5px;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
+<style>
+    .container-fluid {
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
 
-        .popup {
-            display: none;
-            position: absolute;
-            border: 1px solid #ccc;
-            padding: 10px;
-            z-index: 1000; /* Adjust z-index to ensure it appears above other elements */
-            background-color: #fff; /* Add a background color for better visibility */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+    .popup {
+        display: none;
+        position: absolute;
+        border: 1px solid #ccc;
+        padding: 10px;
+        z-index: 100000000; /* Adjust z-index to ensure it appears above other elements */
+        background-color: #fff; /* Add a background color for better visibility */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-        .hover-word {
-            font-weight: bold;
-            color: #ffc107; /* Match the accent color of the base layout */
-        }
+    .hover-word {
+        font-weight: bold;
+        color: #ffc107; /* Match the accent color of the base layout */
+    }
 
-        .hidden {
-            opacity: 0.5; /* Opacité réduite pour les éléments masqués */
-        }
+    .modal-footer-start {
+    justify-content: flex-start !important;
+    }
 
-        .carousel-img {
-            max-height: 300px; /* Set a maximum height */
-            object-fit: cover; /* Ensure the image covers the whole container */
-        }
-    </style>
+    .hidden {
+        opacity: 0.5; /* Opacité réduite pour les éléments masqués */
+    }
+
+    .carousel-item {
+        position: relative;
+    }
+
+    .image-description {
+        position: absolute;
+        bottom: 0;
+        background: #073642;
+        color: #FFFFF; /* Text color */
+        width: 100%;
+        transform: translateY(100%);
+        transition: transform 0.3s ease-in-out;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .carousel-item:hover .image-description {
+        transform: translateY(0);
+    }
+
+    .carousel-image-container {
+        position: relative;
+        width: 100%; /* Adjust the width as needed */
+        height: 300px; /* Fixed height for the images */
+        overflow: hidden;
+    }
+
+    .carousel-img {
+        height: 100%;
+        object-fit: cover; /* This will handle larger images */
+    }
+
+    .zoom-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        cursor: pointer;
+    }
+
+    .carousel-image-container:hover .zoom-icon {
+        opacity: 0.8;
+    }
+
+    #imageModal .modal-dialog {
+        max-width: 90%;
+    }
+
+    #modalDescription {
+        background: #073642;
+        color: #FFFFF; /* Text color */
+        padding: 10px;
+        text-align: left;
+    }
+
+    #modalImage {
+        width: 100%;
+        overflow-y: auto;   /* Add scroll bar if the image is too large */
+    }
+
+    .modal-body {
+        position: relative;
+        -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+        flex: 1 1 auto;
+        padding: 1rem;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    /* Sidebar and arrow styles */
+    .sidebar-left, .sidebar-right {
+        position: fixed;
+        top: 75px;
+        bottom: 0;
+        width: 250px;
+        overflow-y: auto;
+        background-color: #073642;
+        transition: transform 0.3s ease;
+        z-index: 1040; /* Bootstrap's default z-index for fixed elements */
+    }
+
+    .sidebar-left {
+        left: -225px; /* Initially hidden off-screen */
+    }
+
+    .sidebar-right {
+        right: -225px; /* Initially hidden off-screen */
+    }
+
+    .arrow-left, .arrow-right {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #073642;
+        color: white;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 1050; /* Ensure it's above the sidebar */
+    }
+
+    .arrow-left {
+        left: 0; /* Position the arrow outside the left sidebar */
+    }
+
+    .arrow-right {
+        right: 0; /* Position the arrow outside the right sidebar */
+    }
+
+    .sidebar-left.active {
+        transform: translateX(225px); /* Move the left sidebar into view */
+    }
+
+    .sidebar-right.active {
+        transform: translateX(-225px); /* Move the right sidebar into view */
+    }
+
+    .main-content {
+        margin: 0 auto; /* Center the main content */
+        padding: 20px;
+    }
+
+    .row {
+        justify-content: center; /* Center the row contents */
+    }
+
+    .arrow-left.active::before {
+        content: "\25C0"; /* Right-pointing arrow */
+    }
+
+    .arrow-right.active::before {
+        content: "\25B6"; /* Left-pointing arrow */
+    }
+
+    .arrow-left::before {
+        content: "\25B6"; /* Left-pointing arrow */
+    }
+
+    .arrow-right::before {
+        content: "\25C0"; /* Right-pointing arrow */
+    }
+</style>
 {% endblock %}
-    
+
 <!-- Scripts for Popup and Cards -->
 {% block scripts %}
 <script>
     let currentPopup = null;
 
-    function showPopup(element, word, glossary_terms) {
+    function showPopup(element, word) {
+        glossary_terms = {{ glossary_terms|safe }}
         // Remove previous popup
         hidePopup();
 
         // Récupérer les informations du mot dans le model GlossaryTerm
-        let terms = JSON.parse(glossary_terms);
-        let term = terms[word];
-        let description = term.description;
-        
+        let terms = glossary_terms;
+        let term = word;
+        let description = terms[word];
+
 
         // Créer le contenu du popup
         let popup = document.createElement('div');
         popup.className = 'popup';
         popup.innerHTML = `
-            <h5>${term.term}</h5>
-            <p>${term.description}</p>
-            <p class="text-muted">${term.source}</p>
+            <h5>${term}</h5>
+            <p>${description}</p>
         `;
 
         // Positionner le popup
@@ -187,49 +370,77 @@
     }
 
     function hidePopup() {
-        if (currentPopup !== null) {
+        if (currentPopup !==null) {
             currentPopup.remove();
             currentPopup = null;
         }
     }
 
+    document.addEventListener('mouseover', function(event) {
+        let target = event.target;
+        if (target.classList.contains('hover-word')) {
+            showPopup(target, target.innerText);
+        }
+    });
+
+    document.addEventListener('mouseout', function(event) {
+        if (event.target.classList.contains('hover-word')) {
+            hidePopup();
+        }
+    });
+
     function filterTextFieldsByCompetence(competence) {
         let textFields = document.querySelectorAll('.text-field-item');
-        textFields.forEach(textField => {
-            let competences = textField.getAttribute('data-competences').split(',');
+        let filteredFields = [];
+
+        textFields.forEach(function(field) {
+            let competences = field.dataset.competences.split(',');
             if (competences.includes(competence)) {
-                textField.classList.remove('hidden');
+                field.classList.remove('hidden');
+                filteredFields.push(field);
             } else {
-                textField.classList.add('hidden');
+                field.classList.add('hidden');
             }
         });
+
+        if (filteredFields.length > 0) {
+            let randomField = filteredFields[Math.floor(Math.random() * filteredFields.length)];
+            randomField.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     function resetFilter() {
         let textFields = document.querySelectorAll('.text-field-item');
-        textFields.forEach(textField => {
-            textField.classList.remove('hidden');
+        textFields.forEach(function(field) {
+            field.classList.remove('hidden');
         });
     }
 
-    document.addEventListener('click', function(event) {
-        if (currentPopup !== null && !event.target.classList.contains('hover-word')) {
-            hidePopup();
-        }
-    });
+    function toggleLeftSidebar() {
+        let leftSidebar = document.querySelector('.sidebar-left');
+        leftSidebar.classList.toggle('active');
+        let arrowLeft = document.querySelector('.arrow-left');
+        arrowLeft.classList.toggle('active');
+    }
 
-    document.addEventListener('scroll', function() {
-        if (currentPopup !== null) {
-            hidePopup();
-        }
-    });
-
-    // Ensure carousels are initialized correctly
+    function toggleRightSidebar() {
+        let rightSidebar = document.querySelector('.sidebar-right');
+        rightSidebar.classList.toggle('active');
+        let arrowRight = document.querySelector('.arrow-right');
+        arrowRight.classList.toggle('active');
+    }
     document.addEventListener('DOMContentLoaded', function () {
         $('.carousel').each(function() {
             $(this).carousel();
         });
+        $('.carousel-image-container').on('click', function() {
+            var imageSrc = $(this).data('image');
+            var imageDescription = $(this).data('description');
+            $('#modalImage').attr('src', imageSrc);
+            $('#modalDescription').html(imageDescription);
+            $('#imageModal').modal('show');
+        });
     });
 </script>
 {% endblock %}
-{% endblock %}
+{% endblock content %}

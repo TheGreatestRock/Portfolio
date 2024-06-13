@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-gqq$uwmurb4pfub9o-1s&2h^v@cy#w4zi^oy!_fi1)k(ih%0bw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["thegreatestrock.pythonanywhere.com"]
 
 
 # Application definition
@@ -116,7 +116,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-
+PROJECT_DIR = str(os.path.dirname(os.path.abspath(__file__))).replace("\\settings", "")
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'Pillage', 'static')
 STATIC_URL = '/static/'
 
 # Default primary key field type

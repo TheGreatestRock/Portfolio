@@ -11,7 +11,7 @@ def home(request):
 def about(request):
     bio = Bio.objects.first()
     projects = Project.objects.all()
-    
+
     context = {
         'profile_picture_url': bio.profile_picture.url if bio and bio.profile_picture else None,
         'name': bio.name if bio else None,
@@ -21,7 +21,7 @@ def about(request):
         'social_links': bio.social_links if bio else None,
         'projects': projects
     }
-    
+
     return render(request, 'portfolio/about.html', context)
 
 def all_projects(request):
@@ -34,28 +34,25 @@ def project_detail(request, pk):
     text_fields = TextField.objects.filter(project=project)
     all_competences = Competence.objects.all()
     all_apprentissages = ApprentissageCritique.objects.all()
-    
-    all_glossary_terms = []
-    #glossary terms have a term field
-    for term in GlossaryTerm.objects.all():
-        all_glossary_terms.append(term.term)
-    
-    glossary_terms = GlossaryTerm.objects.all()
+
+    all_glossary_terms = [term.term for term in GlossaryTerm.objects.all()]
+
+    glossary_terms = {term.term: term.description for term in GlossaryTerm.objects.all()}
 
     context = {
         'project': project,
-        'projects' : projects,
+        'projects': projects,
         'text_fields': text_fields,
         'all_competences': all_competences,
         'all_apprentissages': all_apprentissages,
-        'glossary_terms': glossary_terms,
-        'all_glossary_terms': json.dumps(all_glossary_terms)
+        'glossary_terms': glossary_terms,  # No need to json.dumps for template usage
+        'all_glossary_terms': all_glossary_terms  # Pass the list directly
     }
     return render(request, 'portfolio/project_detail.html', context)
 
 def add_text_field(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-    
+
     if request.method == 'POST':
         text_field_form = TextFieldForm(request.POST, request.FILES)
         if text_field_form.is_valid():
